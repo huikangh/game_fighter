@@ -1,16 +1,40 @@
-# This is a sample Python script.
-
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+import time
+import random
+import character
+from assets import *
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+# in-game parameters
+fps = 60
+level = 1
+score = 0
+pygame.font.init()
+main_font = pygame.font.SysFont("comicsans", 35)
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
+def redraw_window():
+    WIN.fill((0,0,0))   # fill the surface with color black
+    level_label = main_font.render(f"Level: {level}", 1, (255,255,255))
+    health_label = main_font.render(f"Score: {score}", 1, (255,255,255))
+    WIN.blit(BG, (0, level_label.get_height()))                         # background image
+    WIN.blit(level_label, (10, 0))                                      # text for level
+    WIN.blit(health_label, (WIDTH-health_label.get_width()-10, 0))      # text for health
+
+    pygame.display.update()
+
+
+def main():
+
+    run = True
+    clock = pygame.time.Clock()
+
+    while run:
+        clock.tick(fps)
+        redraw_window()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+
+
+main()

@@ -17,7 +17,7 @@ main_font = pygame.font.SysFont("comicsans", 35)
 player = Hero(WIDTH//2, HEIGHT//2)
 # enemies
 enemies = []
-wave_size = 0
+waves = [5, 10, 15]
 
 
 
@@ -39,7 +39,7 @@ def redraw_window():
 
 
 def main():
-    global fps, level, wave_size
+    global fps, level, waves
 
     run = True
     clock = pygame.time.Clock()
@@ -53,10 +53,19 @@ def main():
         # spawn wave of enemies
         if len(enemies) == 0:
             level += 1
-            wave_size += 5
+            wave_size = waves[level-1]
             for i in range(wave_size):
-                x = random.randrange(50, WIDTH-50)
-                enemy = EnemyRed(x, -50)
+                randx, randy = 0, 0
+                side = random.choice(["left","right","top","bottom"])  # randomly choose where the enemy would spawn
+                if side == "left":
+                    randx, randy = random.randrange(-500, -100), random.randrange(0, HEIGHT)
+                elif side == "right":
+                    randx, randy = random.randrange(WIDTH+100, WIDTH+500), random.randrange(0, HEIGHT)
+                elif side == "top":
+                    randx, randy = random.randrange(0, WIDTH), random.randrange(-500,-100)
+                elif side == "bottom":
+                    randx, randy = random.randrange(0, WIDTH), random.randrange(HEIGHT+100, HEIGHT+500)
+                enemy = EnemyRed(randx, randy)
                 enemies.append(enemy)
 
         for event in pygame.event.get():

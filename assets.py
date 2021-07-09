@@ -12,6 +12,7 @@ RED_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_red_small.
 GREEN_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_green_small.png"))
 BLUE_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_blue_small.png"))
 YELLOW_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_yellow.png"))
+RED_SPACE_SHIP = pygame.transform.scale(RED_SPACE_SHIP, (35,35))
 YELLOW_SPACE_SHIP = pygame.transform.scale(YELLOW_SPACE_SHIP, (35,35))
 
 # load images of lasers/bullets

@@ -8,13 +8,16 @@ from character import *
 
 # in-game parameters
 fps = 60
-level = 1
+level = 0
 score = 0
 pygame.font.init()
 main_font = pygame.font.SysFont("comicsans", 35)
 
 # main character
 player = Hero(WIDTH//2, HEIGHT//2)
+# enemies
+enemies = []
+wave_size = 0
 
 
 
@@ -27,20 +30,34 @@ def redraw_window():
     WIN.blit(level_label, (10, 0))                                      # blit text for level
     WIN.blit(health_label, (WIDTH-health_label.get_width()-10, 0))      # blit text for health
 
-    player.draw(WIN)      # draw the character
+    for enemy in enemies:   # draw the enemies
+        enemy.draw(WIN)
+    player.draw(WIN)        # draw the main character
 
     pygame.display.update()
 
 
 
 def main():
+    global fps, level, wave_size
 
     run = True
     clock = pygame.time.Clock()
 
     while run:
         clock.tick(fps)
-        redraw_window()
+
+        # check for game over
+        if player.health <= 0:
+            lost = True
+        # spawn wave of enemies
+        if len(enemies) == 0:
+            level += 1
+            wave_size += 5
+            for i in range(wave_size):
+                x = random.randrange(50, WIDTH-50)
+                enemy = EnemyRed(x, -50)
+                enemies.append(enemy)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -57,6 +74,12 @@ def main():
         if keys[pygame.K_DOWN] and player.y + player.mov_spd + player.get_height() < HEIGHT:  # down
             player.y += player.mov_spd
 
+        # make each enemy move towards the player
+        for enemy in enemies:
+            enemy.chase(player.x, player.y)
+
+        redraw_window()
 
 
+# main function
 main()

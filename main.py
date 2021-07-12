@@ -39,13 +39,14 @@ def redraw_window():
 
 
 def main():
-    global fps, level, waves
+    global fps, level, score, waves
 
     run = True
     clock = pygame.time.Clock()
 
     while run:
         clock.tick(fps)
+        redraw_window()
 
         # check for game over
         if player.health <= 0:
@@ -53,6 +54,9 @@ def main():
         # spawn wave of enemies
         if len(enemies) == 0:
             level += 1
+            if level > len(waves):
+                print("You've won!")
+                break
             wave_size = waves[level-1]
             for i in range(wave_size):
                 randx, randy = 0, 0
@@ -82,12 +86,23 @@ def main():
             player.y -= player.mov_spd
         if keys[pygame.K_DOWN] and player.y + player.mov_spd + player.get_height() < HEIGHT:  # down
             player.y += player.mov_spd
+        if keys[pygame.K_w]:
+            player.attack("w")
+        if keys[pygame.K_a]:
+            player.attack("a")
+        if keys[pygame.K_s]:
+            player.attack("s")
+        if keys[pygame.K_d]:
+            player.attack("d")
 
         # make each enemy move towards the player
-        for enemy in enemies:
+        for enemy in enemies[:]:
             enemy.chase(player.x, player.y)
 
-        redraw_window()
+        # move the player's attack, and check for any attack collision
+        score += player.move_attack(enemies)        # move_attack return number of enemies killed
+
+    pygame.quit()
 
 
 # main function

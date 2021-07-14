@@ -10,29 +10,26 @@ def collide(obj1, obj2):
 
 
 class Attack:
-    def __init__(self, x, y, dir, img):
-        self.x = x
-        self.y = y
-        self.dir = dir
-        self.spd = 10
-        self.img = img
+    def __init__(self, x, y, dx, dy, dmg, spd, img):
+        self.x = x                          # the starting x coordinate of the attack
+        self.y = y                          # the starting y coordinate of the attack
+        self.dx = dx                        # the percent change in the x direction (dx+dy = 1)
+        self.dy = dy                        # the fraction change in the y direction (dx+dy = 1)
+        self.dmg = dmg                      # the amount of damage this attack will do
+        self.spd = spd                      # how fast the attack will be moving
+        self.img = img                      # the image of the attack
         self.mask = pygame.mask.from_surface(self.img)
 
     def draw(self, window):
         window.blit(self.img, (self.x, self.y))
 
     def move(self):
-        if self.dir == "w":
-            self.y -= self.spd
-        elif self.dir == "s":
-            self.y += self.spd
-        elif self.dir == "a":
-            self.x -= self.spd
-        elif self.dir == "d":
-            self.x += self.spd
+        self.x += self.dx * self.spd
+        self.y += self.dy * self.spd
 
     def off_screen(self, width, height):
         return self.x < 0 or self.x > width or self.y < 0 or self.y > height
 
     def collision(self, obj):
         return collide(self, obj)
+

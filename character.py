@@ -23,7 +23,7 @@ class Character:
 
     def attack(self, dx, dy, spd):
         if self.cd_counter == 0:
-            new_attack = Attack(self.x, self.y, dx, dy, self.atk, spd, self.atk_img)
+            new_attack = Attack(self.x, self.y, dx, dy, 0.5*self.atk, spd, self.atk_img)
             self.cd_counter = 1
             return new_attack
         return None
@@ -106,7 +106,7 @@ class EnemyRed(Character):
         super().__init__(x, y)
         self.mov_spd = 2
         self.atk = 40
-        self.atk_cd = 1
+        self.atk_cd = None
         self.health = 200
         self.max_health = 200
         self.char_img = RED_SPACE_SHIP

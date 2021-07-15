@@ -21,7 +21,10 @@ player = Hero(WIDTH//2, HEIGHT//2)
 # enemies
 enemies = []
 enemies_attacks = []
-waves = [5, 10, 15]
+waves = [[5, 0],
+         [0, 5],
+         [5, 5],
+         [5, 10]]
 
 
 
@@ -79,7 +82,9 @@ def main():
                 gameover = 1
                 continue
             wave_size = waves[level-1]
-            for i in range(wave_size):
+            red = wave_size[0]
+            green = wave_size[1]
+            for i in range(sum(wave_size)):
                 randx, randy = 0, 0
                 side = random.choice(["left","right","top","bottom"])  # randomly choose where the enemy would spawn
                 if side == "left":
@@ -90,7 +95,10 @@ def main():
                     randx, randy = random.randrange(0, WIDTH), random.randrange(-1000,-100)
                 elif side == "bottom":
                     randx, randy = random.randrange(0, WIDTH), random.randrange(HEIGHT+100, HEIGHT+1000)
-                enemy = EnemyGreen(randx, randy)
+                if i < red:
+                    enemy = EnemyRed(randx, randy)
+                else:
+                    enemy = EnemyGreen(randx, randy)
                 enemies.append(enemy)
 
         for event in pygame.event.get():
@@ -119,11 +127,12 @@ def main():
 
         # update each enemy's movement and action
         for enemy in enemies[:]:
-            enemy.cooldown()
             dx, dy = enemy.chase(player.x, player.y)
-            new_attack = enemy.attack(dx, dy, 5)
-            if new_attack:
-                enemies_attacks.append(new_attack)
+            if isinstance(enemy, EnemyGreen):
+                enemy.cooldown()
+                new_attack = enemy.attack(dx, dy, 5)
+                if new_attack:
+                    enemies_attacks.append(new_attack)
             if collide(enemy, player):
                 player.health -= enemy.atk
                 player.knocked_back(enemy.x, enemy.y, 2*player.get_width())

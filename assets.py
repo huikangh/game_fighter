@@ -2,7 +2,7 @@ import pygame
 import os
 
 # setting for game window
-WIDTH, HEIGHT = 800, 600
+WIDTH, HEIGHT = 1000, 700
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Project Fighter")
 
@@ -16,7 +16,7 @@ GREEN_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_green_sm
 BLUE_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_blue_small.png"))
 YELLOW_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_yellow.png"))
 RED_SPACE_SHIP = pygame.transform.scale(RED_SPACE_SHIP, SIZE_NORMAL)
-GREEN_SPACE_SHIP = pygame.transform.scale(GREEN_SPACE_SHIP, SIZE_NORMAL)
+BLUE_SPACE_SHIP = pygame.transform.scale(BLUE_SPACE_SHIP, SIZE_NORMAL)
 YELLOW_SPACE_SHIP = pygame.transform.scale(YELLOW_SPACE_SHIP, SIZE_NORMAL)
 
 # load images of lasers/bullets
@@ -25,7 +25,7 @@ GREEN_LASER = pygame.image.load(os.path.join("assets", "pixel_laser_green.png"))
 BLUE_LASER = pygame.image.load(os.path.join("assets", "pixel_laser_blue.png"))
 YELLOW_LASER = pygame.image.load(os.path.join("assets", "pixel_laser_yellow.png"))
 RED_LASER = pygame.transform.scale(RED_LASER, SIZE_NORMAL)
-GREEN_LASER  = pygame.transform.scale(GREEN_LASER, SIZE_NORMAL)
+BLUE_LASER  = pygame.transform.scale(BLUE_LASER, SIZE_NORMAL)
 YELLOW_LASER  = pygame.transform.scale(YELLOW_LASER, SIZE_NORMAL)
 
 

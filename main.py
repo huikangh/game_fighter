@@ -98,7 +98,7 @@ def main():
                 if i < red:
                     enemy = EnemyRed(randx, randy)
                 else:
-                    enemy = EnemyGreen(randx, randy)
+                    enemy = EnemyBlue(randx, randy)
                 enemies.append(enemy)
 
         for event in pygame.event.get():
@@ -128,7 +128,7 @@ def main():
         # update each enemy's movement and action
         for enemy in enemies[:]:
             dx, dy = enemy.chase(player.x, player.y)
-            if isinstance(enemy, EnemyGreen):
+            if isinstance(enemy, EnemyBlue):
                 enemy.cooldown()
                 new_attack = enemy.attack(dx, dy, 5)
                 if new_attack:

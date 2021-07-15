@@ -1,5 +1,6 @@
 import math
 import pygame
+import random
 from attack import *
 from assets import *
 
@@ -123,16 +124,17 @@ class EnemyRed(Character):
         return dx / dist, dy / dist
 
 
-class EnemyGreen(Character):
+class EnemyBlue(Character):
     def __init__(self, x, y):
         super().__init__(x, y)
         self.mov_spd = 1
         self.atk = 40
         self.atk_cd = 90
+        self.cd_counter = random.randrange(0, self.atk_cd)
         self.health = 100
         self.max_health = 100
-        self.char_img = GREEN_SPACE_SHIP
-        self.atk_img = GREEN_LASER
+        self.char_img = BLUE_SPACE_SHIP
+        self.atk_img = BLUE_LASER
         self.mask = pygame.mask.from_surface(self.char_img)
 
     def chase(self, x, y):

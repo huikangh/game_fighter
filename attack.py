@@ -1,3 +1,4 @@
+import math
 import pygame
 from assets import *
 
@@ -17,8 +18,11 @@ class Attack:
         self.dy = dy                        # the fraction change in the y direction (dx+dy = 1)
         self.dmg = dmg                      # the amount of damage this attack will do
         self.spd = spd                      # how fast the attack will be moving
-        self.img = img                      # the image of the attack
+        self.img = img
         self.mask = pygame.mask.from_surface(self.img)
+        # if dx is not 0, determine how the attack should rotate to face the target
+        if dx:
+            self.img = pygame.transform.rotate(img, -90-math.degrees(math.atan(dy/dx)))
 
     def draw(self, window):
         window.blit(self.img, (self.x, self.y))

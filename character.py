@@ -121,7 +121,6 @@ class EnemyRed(Character):
         dist = math.sqrt(dx*dx + dy*dy)
         self.x += self.mov_spd * dx/dist
         self.y += self.mov_spd * dy/dist
-        return dx / dist, dy / dist
 
 
 class EnemyBlue(Character):
@@ -137,14 +136,82 @@ class EnemyBlue(Character):
         self.atk_img = BLUE_LASER
         self.mask = pygame.mask.from_surface(self.char_img)
 
+    def calc_dxdy(self, x, y):
+        # calculate the delta_x and delta_y from unit to target as a value in [0,1] where dx + dy = 1
+        dx = x - self.x
+        dy = y - self.y
+        dist = math.sqrt(dx * dx + dy * dy)
+        return dx / dist, dy / dist
+
     def chase(self, x, y):
-        # move towards the given (x,y) coordinate, return the direction to chase in (dx, dy)
+        # move towards the given (x,y) coordinate
+        dx = x - self.x
+        dy = y - self.y
+        dist = math.sqrt(dx * dx + dy * dy)
+        self.x += self.mov_spd * dx / dist
+        self.y += self.mov_spd * dy / dist
+
+
+class EnemyBoss(Character):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.mov_spd = 2
+        self.atk = 50
+        self.atk_cd = 90
+        self.cd_counter = random.randrange(0, self.atk_cd)
+        self.health = 2000
+        self.max_health = 2000
+        self.char_img = GREEN_SPACE_SHIP
+        self.atk_img = GREEN_LASER
+        self.mask = pygame.mask.from_surface(self.char_img)
+
+    def knocked_back(self, x, y, kb_dist):
+        # unit is knocked back towards the opposite direction of (x,y)
+        dx = x - self.x
+        dy = y - self.y
+        dist = math.sqrt(dx*dx + dy*dy)
+        self.x -= kb_dist * (dx/dist) * 0.25
+        self.y -= kb_dist * (dy/dist) * 0.25
+
+    def calc_dxdy(self, x, y):
+        # calculate the delta_x and delta_y from unit to target as a value in [0,1] where dx + dy = 1
+        dx = x - self.x
+        dy = y - self.y
+        dist = math.sqrt(dx*dx + dy*dy)
+        return dx/dist, dy/dist
+
+    def chase(self, x, y):
+        # move towards the given (x,y) coordinate
         dx = x - self.x
         dy = y - self.y
         dist = math.sqrt(dx*dx + dy*dy)
         self.x += self.mov_spd * dx/dist
         self.y += self.mov_spd * dy/dist
-        return dx/dist, dy/dist
 
+    def hoover(self):
+        dx = random.random()
+        dy = 1 - dx
+        # 50/50 to decide whether dx and dy are positive or negative
+        if random.random() <= 0.5:
+            dx = -dx
+        if random.random() <= 0.5:
+            dy = -dy
+        self.x += self.mov_spd * dx
+        self.y += self.mov_spd * dy
 
+    def attack(self, dx, dy, spd):
+        # fire multiple attacks in the shape of a fan
+        shots = []
+        if self.cd_counter == 0:
+            angles = [-45, -22.5, 0, 22.5, 45]
+            for a in angles:
+                angle = a + math.degrees(math.atan(dy/dx))
+                new_dx = math.cos(math.radians(angle))
+                new_dy = math.sin(math.radians(angle))
+                new_dx = -new_dx if dx < 0 else new_dx
+                new_dy = -new_dy if dx < 0 else new_dy
+                shot = Attack(self.x, self.y, new_dx, new_dy, 0.5*self.atk, spd, self.atk_img)
+                shots.append(shot)
+            self.cd_counter = 1
+        return shots
 

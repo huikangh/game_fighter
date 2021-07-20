@@ -3,6 +3,7 @@ import os
 
 # setting for game window
 WIDTH, HEIGHT = 1000, 700
+DISPLAY_BAR_HEIGHT = HEIGHT//20
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Project Fighter")
 

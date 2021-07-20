@@ -34,9 +34,9 @@ def redraw_window():
 
     level_label = counter_font.render(f"Level: {level}", 1, (255,255,255))
     score_label = counter_font.render(f"Score: {score}", 1, (255,255,255))
-    WIN.blit(BG, (0, level_label.get_height()))                         # blit background image
-    WIN.blit(level_label, (10, 0))                                      # blit text for level
-    WIN.blit(score_label, (WIDTH-score_label.get_width()-10, 0))      # blit text for health
+    WIN.blit(BG, (0, DISPLAY_BAR_HEIGHT))                         # blit background image
+    WIN.blit(level_label, (20, (DISPLAY_BAR_HEIGHT-level_label.get_height())/2))    # blit text for level
+    WIN.blit(score_label, (WIDTH-score_label.get_width()-20, (DISPLAY_BAR_HEIGHT-score_label.get_height())/2))
 
     for enemy in enemies:   # draw the enemies
         enemy.draw(WIN)
@@ -55,6 +55,17 @@ def redraw_window():
 
 
 
+def reset():
+    global level, score, gameover, over_counter, player, enemies, enemies_attacks
+    level = 0
+    score = 0
+    gameover = 0
+    over_counter = 0
+    player = Hero(WIDTH // 2, HEIGHT // 2)
+    enemies = []
+    enemies_attacks = []
+
+
 def main():
     global fps, level, score, waves, gameover, over_counter
 
@@ -71,7 +82,7 @@ def main():
         if gameover:
             over_counter += 1
             if over_counter > fps*3:
-                break
+                run = False
             else:
                 continue
 
@@ -171,6 +182,31 @@ def main():
                     if attack in enemies_attacks: enemies_attacks.remove(attack)
 
 
+def main_menu():
+    run = True
+    while run:
+        reset()
+        # main_menu background
+        WIN.fill((0, 0, 0))
+        WIN.blit(BG, (0,DISPLAY_BAR_HEIGHT))
+        # buttons
+        title_label = message_font.render("Adventure Mode", 1, (0, 0, 0))
+        start_button = pygame.Rect(WIDTH/2-(title_label.get_width()+10)/2,
+            HEIGHT/2-(title_label.get_height()+6)/2, title_label.get_width()+10, title_label.get_height()+6)
+        pygame.draw.rect(WIN, (0, 127, 255), start_button)
+        WIN.blit(title_label, (WIDTH/2-title_label.get_width()/2, HEIGHT/2-title_label.get_height()/2))
 
-# main function
-main()
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if start_button.collidepoint(event.pos):
+                    main()
+
+    pygame.quit()
+
+
+
+main_menu()

@@ -62,7 +62,7 @@ class Hero(Character):
         super().__init__(x, y)
         self.mov_spd = 3
         self.atk = 100
-        self.atk_cd = 10
+        self.atk_cd = 45
         self.health = 100
         self.max_health = 100
         self.char_img = YELLOW_SPACE_SHIP
@@ -156,8 +156,8 @@ class EnemyBoss(Character):
         self.atk = 50
         self.atk_cd = 90
         self.cd_counter = random.randrange(0, self.atk_cd)
-        self.health = 2000
-        self.max_health = 2000
+        self.health = 3000
+        self.max_health = 3000
         self.char_img = GREEN_SPACE_SHIP
         self.atk_img = GREEN_LASER
         self.mask = pygame.mask.from_surface(self.char_img)

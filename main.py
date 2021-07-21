@@ -63,7 +63,7 @@ def redraw_window(game_mode):
 
 
 
-def game_pause(pause, window):
+def game_pause(pause, window, events):
     button = None
     if not pause:
         button = Button(WIDTH / 2 - 100 / 2, 0, 100, DISPLAY_BAR_HEIGHT, (0, 0, 0), (255, 255, 255), "Pause")
@@ -71,9 +71,7 @@ def game_pause(pause, window):
         button = Button(WIDTH / 2 - 100 / 2, 0, 100, DISPLAY_BAR_HEIGHT, (0, 0, 0), (255, 255, 255), "Resume")
     button.draw(window)
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            quit()
+    for event in events:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if button.clicked(event.pos):
                 pause = not pause
@@ -104,12 +102,16 @@ def main(game_mode):
 
     while run:
         clock.tick(fps)
-        redraw_window(game_mode)
-        # check for game pause/unpause
-        pause = game_pause(pause, WIN)
-        pygame.display.update()
+        events = pygame.event.get()                 # retrieve all the pygame events
+        redraw_window(game_mode)                    # redraw the UI
+        pause = game_pause(pause, WIN, events)      # check for game pause/unpause
+        pygame.display.update()                     # update/display what we drew
         if pause:
             continue
+
+        for event in events:
+            if event.type == pygame.QUIT:
+                quit()
 
         # check for game over (lost)
         if player.health <= 0:
@@ -125,13 +127,19 @@ def main(game_mode):
         waves = None
         if game_mode == 1:
             waves = adventure_waves
+            player.atk_cd = 45
         elif game_mode == 2:
             waves = endless_waves
+            player.atk_cd = 15
 
-        # spawn wave of enemies
+        # spawn enemies if a level is cleared
         enemy_count = len(enemies)
         if len(enemies) == 0:
             level += 1
+            # check for game over (won) if in adventure mode
+            if game_mode == 1 and level > len(waves):
+                game_over = 1
+                continue
             # increment number of enemies if in endless mode
             if game_mode == 2:
                 new_wave = waves[-1]
@@ -139,12 +147,9 @@ def main(game_mode):
                     new_wave[1] += 2
                 else:
                     new_wave[0] += 2
-                waves.append(new_wave)
-            # check for game over (won) if in adventure mode
-            if game_mode == 1 and level > len(waves):
-                game_over = 1
-                continue
-            wave_size = waves[level-1]
+                waves[-1] = new_wave
+            # spawn enemies
+            wave_size = waves[level-1] if game_mode == 1 else waves[-1]
             red = wave_size[0]
             blue = wave_size[1]
             boss = wave_size[2]
@@ -168,11 +173,7 @@ def main(game_mode):
                     enemy = EnemyBoss(randx, randy)
                 enemies.append(enemy)
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                quit()
-
-        # check for main character movement
+        # check for player movement
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] and player.x - player.mov_spd > 0:   # left
             player.x -= player.mov_spd

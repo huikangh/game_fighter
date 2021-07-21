@@ -62,7 +62,7 @@ class Hero(Character):
         super().__init__(x, y)
         self.mov_spd = 3
         self.atk = 100
-        self.atk_cd = 30
+        self.atk_cd = 10
         self.health = 100
         self.max_health = 100
         self.char_img = YELLOW_SPACE_SHIP
@@ -83,7 +83,6 @@ class Hero(Character):
             self.cd_counter = 1
 
     def move_attack(self, objs):
-        kills = 0
         self.cooldown()
         for attack in self.attacks:
             attack.move()
@@ -97,9 +96,7 @@ class Hero(Character):
                         obj.knocked_back(self.x, self.y, 0.5*obj.get_width())
                         if obj.health <= 0:
                             objs.remove(obj)
-                            kills += 1
                         if attack in self.attacks: self.attacks.remove(attack)
-        return kills
 
 
 class EnemyRed(Character):

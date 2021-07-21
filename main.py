@@ -2,6 +2,7 @@ import time
 import random
 import pygame
 from assets import *
+from button import *
 from character import *
 
 
@@ -9,97 +10,148 @@ from character import *
 # in-game parameters
 fps = 60
 level = 0
-score = 0
+enemy_count = 0
 pygame.font.init()
 counter_font = pygame.font.SysFont("comicsans", 35)
 message_font = pygame.font.SysFont("comicsans", 50)
-gameover = 0
+game_over = 0
 over_counter = 0
 
 # main character
-player = Hero(WIDTH//2, HEIGHT//2)
+player = Hero(WIDTH/2-(35/2), HEIGHT/2-(35/2))
 # enemies
 enemies = []
 enemies_attacks = []
-waves = [[5, 0, 0],
-         [0, 5, 0],
-         [5, 5, 0],
-         [5,10, 0],
-         [0, 0, 1]]
+endless_waves = [[0, 0, 0]]
+adventure_waves = [[5, 0, 0],
+                   [0, 5, 0],
+                   [5, 5, 0],
+                   [5,10, 0],
+                   [0, 0, 1]]
 
 
 
-def redraw_window():
+def redraw_window(game_mode):
     WIN.fill((0,0,0))   # fill the surface with color black
 
+    # redraw game mode and level/enemy counter
+    mode = "Adventure Mode" if game_mode == 1 else "Endless Mode"
+    mode_label = counter_font.render(mode, 1, (255,255,255))
     level_label = counter_font.render(f"Level: {level}", 1, (255,255,255))
-    score_label = counter_font.render(f"Score: {score}", 1, (255,255,255))
+    enemy_label = counter_font.render(f"Enemies: {enemy_count}", 1, (255,255,255))
     WIN.blit(BG, (0, DISPLAY_BAR_HEIGHT))                         # blit background image
-    WIN.blit(level_label, (20, (DISPLAY_BAR_HEIGHT-level_label.get_height())/2))    # blit text for level
-    WIN.blit(score_label, (WIDTH-score_label.get_width()-20, (DISPLAY_BAR_HEIGHT-score_label.get_height())/2))
+    WIN.blit(mode_label, (20, (DISPLAY_BAR_HEIGHT - level_label.get_height()) / 2))
+    WIN.blit(enemy_label, (WIDTH-enemy_label.get_width()-20,
+                           (DISPLAY_BAR_HEIGHT-enemy_label.get_height())/2))
+    WIN.blit(level_label, (WIDTH-enemy_label.get_width()-60-level_label.get_width(),
+                           (DISPLAY_BAR_HEIGHT-level_label.get_height())/2))
 
-    for enemy in enemies:   # draw the enemies
+    # redraw enemies and player
+    for enemy in enemies:
         enemy.draw(WIN)
     for attack in enemies_attacks:
         attack.draw(WIN)
-    player.draw(WIN)        # draw the main character
+    player.draw(WIN)
 
-    if gameover == -1:
+    # check for game state
+    if game_over == -1:
         lost_label = message_font.render(f"You've lost!", 1, (255,255,255))
         WIN.blit(lost_label, (WIDTH/2 - lost_label.get_width()/2, HEIGHT/2 - lost_label.get_height()/2))
-    elif gameover == 1:
+    elif game_over == 1:
         won_label = message_font.render(f"You've won!", 1, (255,255,255))
         WIN.blit(won_label, (WIDTH/2 - won_label.get_width()/2, HEIGHT/2 - won_label.get_height()/2))
 
-    pygame.display.update()
+
+
+def game_pause(pause, window):
+    button = None
+    if not pause:
+        button = Button(WIDTH / 2 - 100 / 2, 0, 100, DISPLAY_BAR_HEIGHT, (0, 0, 0), (255, 255, 255), "Pause")
+    else:
+        button = Button(WIDTH / 2 - 100 / 2, 0, 100, DISPLAY_BAR_HEIGHT, (0, 0, 0), (255, 255, 255), "Resume")
+    button.draw(window)
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            quit()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if button.clicked(event.pos):
+                pause = not pause
+    return pause
 
 
 
 def reset():
-    global level, score, gameover, over_counter, player, enemies, enemies_attacks
+    global level, enemy_count, game_over, over_counter, player, enemies, enemies_attacks, endless_waves
     level = 0
-    score = 0
-    gameover = 0
+    enemy_count = 0
+    game_over = 0
     over_counter = 0
     player = Hero(WIDTH // 2, HEIGHT // 2)
     enemies = []
     enemies_attacks = []
+    endless_waves = [[0,0,0]]
 
 
-def main():
-    global fps, level, score, waves, gameover, over_counter
+
+# game_mode: 1->Adventure, 2->Endless
+def main(game_mode):
+    global fps, level, enemy_count, endless_waves, adventure_waves, game_over, over_counter
 
     run = True
+    pause = False
     clock = pygame.time.Clock()
 
     while run:
         clock.tick(fps)
-        redraw_window()
+        redraw_window(game_mode)
+        # check for game pause/unpause
+        pause = game_pause(pause, WIN)
+        pygame.display.update()
+        if pause:
+            continue
 
         # check for game over (lost)
         if player.health <= 0:
-            gameover = -1
-        if gameover:
+            game_over = -1
+        if game_over:
             over_counter += 1
             if over_counter > fps*3:
                 run = False
             else:
                 continue
 
+        # check game mode:
+        waves = None
+        if game_mode == 1:
+            waves = adventure_waves
+        elif game_mode == 2:
+            waves = endless_waves
+
         # spawn wave of enemies
+        enemy_count = len(enemies)
         if len(enemies) == 0:
             level += 1
-            # check for game over (won)
-            if level > len(waves):
-                gameover = 1
+            # increment number of enemies if in endless mode
+            if game_mode == 2:
+                new_wave = waves[-1]
+                if new_wave[0] > new_wave[1]:
+                    new_wave[1] += 2
+                else:
+                    new_wave[0] += 2
+                waves.append(new_wave)
+            # check for game over (won) if in adventure mode
+            if game_mode == 1 and level > len(waves):
+                game_over = 1
                 continue
             wave_size = waves[level-1]
             red = wave_size[0]
             blue = wave_size[1]
             boss = wave_size[2]
             for i in range(sum(wave_size)):
+                # randomly choose where the enemy would spawn
                 randx, randy = 0, 0
-                side = random.choice(["left","right","top","bottom"])  # randomly choose where the enemy would spawn
+                side = random.choice(["left","right","top","bottom"])
                 if side == "left":
                     randx, randy = random.randrange(-1000, -100), random.randrange(0, HEIGHT)
                 elif side == "right":
@@ -118,7 +170,6 @@ def main():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                run = False
                 quit()
 
         # check for main character movement
@@ -168,7 +219,7 @@ def main():
                 player.knocked_back(enemy.x, enemy.y, player.get_width())
 
         # move the player's attack, and check for any attack collision
-        score += player.move_attack(enemies)        # move_attack return number of enemies killed
+        player.move_attack(enemies)
 
         # move the enemies' attack
         for attack in enemies_attacks[:]:
@@ -183,29 +234,36 @@ def main():
 
 
 def main_menu():
+    # buttons on the menu
+    button1 = Button(WIDTH/2-200/2, HEIGHT/2-50/2,       210, 40, (0,100,255), (0,0,0), "Adventure Mode")
+    button2 = Button(WIDTH/2-200/2, (HEIGHT/2-50/2)+60,  210, 40, (0,100,255), (0,0,0), "Endless Mode")
+    button3 = Button(WIDTH/2-200/2, (HEIGHT/2-50/2)+120, 210, 40, (0,100,255), (0,0,0), "Exit Game")
+
     run = True
     while run:
         reset()
         # main_menu background
         WIN.fill((0, 0, 0))
         WIN.blit(BG, (0,DISPLAY_BAR_HEIGHT))
-        # buttons
-        title_label = message_font.render("Adventure Mode", 1, (0, 0, 0))
-        start_button = pygame.Rect(WIDTH/2-(title_label.get_width()+10)/2,
-            HEIGHT/2-(title_label.get_height()+6)/2, title_label.get_width()+10, title_label.get_height()+6)
-        pygame.draw.rect(WIN, (0, 127, 255), start_button)
-        WIN.blit(title_label, (WIDTH/2-title_label.get_width()/2, HEIGHT/2-title_label.get_height()/2))
-
+        # redraw_buttons
+        button1.draw(WIN)
+        button2.draw(WIN)
+        button3.draw(WIN)
+        # refresh
         pygame.display.update()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if start_button.collidepoint(event.pos):
-                    main()
+                if button1.clicked(event.pos):
+                    main(1)
+                elif button2.clicked(event.pos):
+                    main(2)
+                elif button3.clicked(event.pos):
+                    run = False
 
-    pygame.quit()
+    quit()
 
 
 

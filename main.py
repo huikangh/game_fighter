@@ -109,10 +109,6 @@ def main(game_mode):
         if pause:
             continue
 
-        for event in events:
-            if event.type == pygame.QUIT:
-                quit()
-
         # check for game over (lost)
         if player.health <= 0:
             game_over = -1
@@ -173,6 +169,17 @@ def main(game_mode):
                     enemy = EnemyBoss(randx, randy)
                 enemies.append(enemy)
 
+        # player attack with mouse, or quit the game
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = event.pos[0], event.pos[1]
+                dx, dy = x - player.x, y - player.y
+                dist = math.sqrt(dx * dx + dy * dy)
+                dx, dy = dx / dist, dy / dist
+                player.attack(dx, dy, 15)
+            if event.type == pygame.QUIT:
+                quit()
+
         # check for player movement
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] and player.x - player.mov_spd > 0:   # left
@@ -191,6 +198,8 @@ def main(game_mode):
             player.attack(0, 1, 15)
         if keys[pygame.K_d]:
             player.attack(1, 0, 15)
+
+
 
         # update each enemy's movement and action
         for enemy in enemies[:]:
@@ -236,9 +245,9 @@ def main(game_mode):
 
 def main_menu():
     # buttons on the menu
-    button1 = Button(WIDTH/2-200/2, HEIGHT/2-50/2,       210, 40, (0,100,255), (0,0,0), "Adventure Mode")
-    button2 = Button(WIDTH/2-200/2, (HEIGHT/2-50/2)+60,  210, 40, (0,100,255), (0,0,0), "Endless Mode")
-    button3 = Button(WIDTH/2-200/2, (HEIGHT/2-50/2)+120, 210, 40, (0,100,255), (0,0,0), "Exit Game")
+    button1 = Button(WIDTH/2-200/2, HEIGHT/2-50/2,       210, 40, (55,110,219), (0,0,0), "Adventure Mode")
+    button2 = Button(WIDTH/2-200/2, (HEIGHT/2-50/2)+60,  210, 40, (55,110,219), (0,0,0), "Endless Mode")
+    button3 = Button(WIDTH/2-200/2, (HEIGHT/2-50/2)+120, 210, 40, (55,110,219), (0,0,0), "Exit Game")
 
     run = True
     while run:
@@ -246,6 +255,10 @@ def main_menu():
         # main_menu background
         WIN.fill((0, 0, 0))
         WIN.blit(BG, (0,DISPLAY_BAR_HEIGHT))
+        # title
+        title_font = pygame.font.SysFont("comicsans", 100)
+        title_label = title_font.render("Project Fighter", 1, (55,110,219))
+        WIN.blit(title_label, (WIDTH/2-title_label.get_width()/2, HEIGHT/4))
         # redraw_buttons
         button1.draw(WIN)
         button2.draw(WIN)

@@ -1,6 +1,8 @@
 import pygame
 import os
 
+pygame.init()
+
 # setting for game window
 WIDTH, HEIGHT = 1000, 700
 DISPLAY_BAR_HEIGHT = HEIGHT//20
@@ -11,7 +13,6 @@ pygame.display.set_caption("Project Fighter")
 SCALER = 0.035*WIDTH
 SIZE_NORMAL = (35, 35)
 SIZE_BOSS = (70, 70)
-
 
 # load images of characters
 RED_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_red_small.png"))
@@ -33,7 +34,13 @@ GREEN_LASER = pygame.transform.scale(GREEN_LASER, SIZE_NORMAL)
 BLUE_LASER  = pygame.transform.scale(BLUE_LASER, SIZE_NORMAL)
 YELLOW_LASER  = pygame.transform.scale(YELLOW_LASER, SIZE_NORMAL)
 
-
 # load background image
 BG = pygame.image.load(os.path.join("assets", "background-black.png"))
 BG = pygame.transform.scale(BG, (WIDTH, HEIGHT))
+
+# sound files
+pygame.mixer.init()
+arrow_sound = pygame.mixer.Sound(os.path.join("assets", "Fire_Arrow2.mp3"))
+laser_sound = pygame.mixer.Sound(os.path.join("assets", "Laser_Blast2.mp3"))
+blast_sound = pygame.mixer.Sound(os.path.join("assets", "Blast2.mp3"))
+pygame.mixer.music.load(os.path.join("assets", "Homework_David_Fesliyan.mp3"))

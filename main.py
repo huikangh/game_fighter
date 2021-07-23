@@ -1,7 +1,3 @@
-import time
-import random
-import pygame
-from assets import *
 from button import *
 from character import *
 
@@ -75,6 +71,8 @@ def game_pause(pause, window, events):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if button.clicked(event.pos):
                 pause = not pause
+        if event.type == pygame.QUIT:
+            quit()
     return pause
 
 
@@ -169,17 +167,6 @@ def main(game_mode):
                     enemy = EnemyBoss(randx, randy)
                 enemies.append(enemy)
 
-        # player attack with mouse, or quit the game
-        for event in events:
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                x, y = event.pos[0], event.pos[1]
-                dx, dy = x - player.x, y - player.y
-                dist = math.sqrt(dx * dx + dy * dy)
-                dx, dy = dx / dist, dy / dist
-                player.attack(dx, dy, 15)
-            if event.type == pygame.QUIT:
-                quit()
-
         # check for player movement
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] and player.x - player.mov_spd > 0:   # left
@@ -199,7 +186,16 @@ def main(game_mode):
         if keys[pygame.K_d]:
             player.attack(1, 0, 15)
 
-
+        # player attack with mouse, or quit the game
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = event.pos[0], event.pos[1]
+                dx, dy = x - player.x, y - player.y
+                dist = math.sqrt(dx * dx + dy * dy)
+                dx, dy = dx / dist, dy / dist
+                player.attack(dx, dy, 15)
+            if event.type == pygame.QUIT:
+                quit()
 
         # update each enemy's movement and action
         for enemy in enemies[:]:
@@ -225,6 +221,7 @@ def main(game_mode):
                     for shot in boss_attack:
                         enemies_attacks.append(shot)
             if collide(enemy, player):
+                pygame.mixer.Sound.play(blast_sound)
                 player.health -= enemy.atk
                 player.knocked_back(enemy.x, enemy.y, player.get_width())
 
@@ -238,12 +235,16 @@ def main(game_mode):
                 enemies_attacks.remove(attack)
             else:
                 if attack.collision(player):
+                    pygame.mixer.Sound.play(blast_sound)
                     player.health -= attack.dmg
                     player.knocked_back(attack.x, attack.y, 0.5*player.get_width())
                     if attack in enemies_attacks: enemies_attacks.remove(attack)
 
 
 def main_menu():
+    # background music
+    pygame.mixer.music.play(-1)
+
     # buttons on the menu
     button1 = Button(WIDTH/2-200/2, HEIGHT/2-50/2,       210, 40, (55,110,219), (0,0,0), "Adventure Mode")
     button2 = Button(WIDTH/2-200/2, (HEIGHT/2-50/2)+60,  210, 40, (55,110,219), (0,0,0), "Endless Mode")

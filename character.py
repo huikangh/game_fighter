@@ -1,8 +1,5 @@
-import math
-import pygame
 import random
 from attack import *
-from assets import *
 
 
 class Character:
@@ -25,6 +22,8 @@ class Character:
     def attack(self, dx, dy, spd):
         if self.cd_counter == 0:
             new_attack = Attack(self.x, self.y, dx, dy, 0.5*self.atk, spd, self.atk_img)
+            if not new_attack.off_screen(WIDTH, HEIGHT):
+                pygame.mixer.Sound.play(laser_sound)
             self.cd_counter = 1
             return new_attack
         return None
@@ -79,6 +78,7 @@ class Hero(Character):
     def attack(self, dx, dy, spd):
         if self.cd_counter == 0:
             new_attack = Attack(self.x, self.y, dx, dy, self.atk, spd, self.atk_img)
+            pygame.mixer.Sound.play(arrow_sound)
             self.attacks.append(new_attack)
             self.cd_counter = 1
 
@@ -92,6 +92,7 @@ class Hero(Character):
                 # check if the player's attack hit any enemy among all the enemies
                 for obj in objs:
                     if attack.collision(obj):
+                        pygame.mixer.Sound.play(blast_sound)
                         obj.health -= attack.dmg
                         obj.knocked_back(self.x, self.y, 0.5*obj.get_width())
                         if obj.health <= 0:
@@ -209,6 +210,8 @@ class EnemyBoss(Character):
                 new_dy = -new_dy if dx < 0 else new_dy
                 shot = Attack(self.x, self.y, new_dx, new_dy, 0.5*self.atk, spd, self.atk_img)
                 shots.append(shot)
+            if not shots[2].off_screen(WIDTH, HEIGHT):
+                pygame.mixer.Sound.play(laser_sound)
             self.cd_counter = 1
         return shots
 

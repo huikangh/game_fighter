@@ -20,8 +20,12 @@ class Attack:
         self.img = img
         self.mask = pygame.mask.from_surface(self.img)
         # if dx is not 0, determine how the attack should rotate to face the target
-        if dx:
+        if dx > 0:
             self.img = pygame.transform.rotate(img, -90-math.degrees(math.atan(dy/dx)))
+        elif dx < 0:
+            self.img = pygame.transform.rotate(img, 90-math.degrees(math.atan(dy/dx)))
+        elif dx == 0 and dy > 0:
+            self.img = pygame.transform.rotate(img, -180)
 
     def draw(self, window):
         window.blit(self.img, (self.x, self.y))

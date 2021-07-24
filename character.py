@@ -23,7 +23,7 @@ class Character:
         if self.cd_counter == 0:
             new_attack = Attack(self.x, self.y, dx, dy, 0.5*self.atk, spd, self.atk_img)
             if not new_attack.off_screen(WIDTH, HEIGHT):
-                pygame.mixer.Sound.play(laser_sound)
+                pygame.mixer.Sound.play(blast_sound)
             self.cd_counter = 1
             return new_attack
         return None
@@ -64,8 +64,8 @@ class Hero(Character):
         self.atk_cd = 45
         self.health = 100
         self.max_health = 100
-        self.char_img = YELLOW_SPACE_SHIP
-        self.atk_img = YELLOW_LASER
+        self.char_img = HIKARI
+        self.atk_img = WIND_ARROW
         self.mask = pygame.mask.from_surface(self.char_img)
         self.attacks = []   # a list that stores all the player's attacks
 
@@ -77,7 +77,10 @@ class Hero(Character):
 
     def attack(self, dx, dy, spd):
         if self.cd_counter == 0:
-            new_attack = Attack(self.x, self.y, dx, dy, self.atk, spd, self.atk_img)
+            # adjust the x/y coordinates a bit based on the image size
+            x = self.x + (self.get_width()- 15)/2
+            y = self.y + (self.get_height()-15)/2
+            new_attack = Attack(x, y, dx, dy, self.atk, spd, self.atk_img)
             pygame.mixer.Sound.play(arrow_sound)
             self.attacks.append(new_attack)
             self.cd_counter = 1
@@ -92,7 +95,6 @@ class Hero(Character):
                 # check if the player's attack hit any enemy among all the enemies
                 for obj in objs:
                     if attack.collision(obj):
-                        pygame.mixer.Sound.play(blast_sound)
                         obj.health -= attack.dmg
                         obj.knocked_back(self.x, self.y, 0.5*obj.get_width())
                         if obj.health <= 0:
@@ -108,8 +110,8 @@ class EnemyRed(Character):
         self.atk_cd = None
         self.health = 200
         self.max_health = 200
-        self.char_img = RED_SPACE_SHIP
-        self.atk_img = RED_LASER
+        self.char_img = GOBLIN
+        self.atk_img = PD_21_BULLET
         self.mask = pygame.mask.from_surface(self.char_img)
 
     def chase(self, x, y):
@@ -130,8 +132,8 @@ class EnemyBlue(Character):
         self.cd_counter = random.randrange(0, self.atk_cd)
         self.health = 100
         self.max_health = 100
-        self.char_img = BLUE_SPACE_SHIP
-        self.atk_img = BLUE_LASER
+        self.char_img = CROW
+        self.atk_img = PD_21_BULLET
         self.mask = pygame.mask.from_surface(self.char_img)
 
     def calc_dxdy(self, x, y):
@@ -153,14 +155,14 @@ class EnemyBlue(Character):
 class EnemyBoss(Character):
     def __init__(self, x, y):
         super().__init__(x, y)
-        self.mov_spd = 2
+        self.mov_spd = 1.5
         self.atk = 50
         self.atk_cd = 90
         self.cd_counter = random.randrange(0, self.atk_cd)
-        self.health = 3000
-        self.max_health = 3000
-        self.char_img = GREEN_SPACE_SHIP
-        self.atk_img = GREEN_LASER
+        self.health = 2500
+        self.max_health = 2500
+        self.char_img = TRUE_DEVIL_CAIN
+        self.atk_img = MD_21_BULLET
         self.mask = pygame.mask.from_surface(self.char_img)
 
     def knocked_back(self, x, y, kb_dist):

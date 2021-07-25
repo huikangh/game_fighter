@@ -22,7 +22,7 @@ endless_waves = [[0, 0, 0]]
 adventure_waves = [[5, 0, 0],
                    [0, 5, 0],
                    [5, 5, 0],
-                   [5,10, 0],
+                   [8, 8, 0],
                    [0, 0, 1]]
 
 
@@ -160,9 +160,9 @@ def main(game_mode):
                 elif side == "bottom":
                     randx, randy = random.randrange(0, WIDTH), random.randrange(HEIGHT+100, HEIGHT+1000)
                 if i < red:
-                    enemy = EnemyRed(randx, randy)
+                    enemy = Enemy(randx, randy)
                 elif i < red+blue:
-                    enemy = EnemyBlue(randx, randy)
+                    enemy = EnemyRanged(randx, randy)
                 else:
                     enemy = EnemyBoss(randx, randy)
                 enemies.append(enemy)
@@ -171,29 +171,32 @@ def main(game_mode):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] and player.x - player.mov_spd > 0:   # left
             player.x -= player.mov_spd
+            player.true_x -= player.mov_spd
         if keys[pygame.K_RIGHT] and player.x + player.mov_spd + player.get_width() < WIDTH:  # right
             player.x += player.mov_spd
+            player.true_x += player.mov_spd
         if keys[pygame.K_UP] and player.y - player.mov_spd > 0:     # up
             player.y -= player.mov_spd
+            player.true_y -= player.mov_spd
         if keys[pygame.K_DOWN] and player.y + player.mov_spd + player.get_height() < HEIGHT:  # down
             player.y += player.mov_spd
+            player.true_y += player.mov_spd
         if keys[pygame.K_w]:
             player.attack(0,-1, 15)
-        if keys[pygame.K_a]:
-            player.attack(-1, 0, 15)
         if keys[pygame.K_s]:
             player.attack(0, 1, 15)
         if keys[pygame.K_d]:
             player.attack(1, 0, 15)
+        if keys[pygame.K_a]:
+            player.attack(-1, 0, 15)
 
         # player attack with mouse, or quit the game
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos[0], event.pos[1]
-                dx, dy = x-(player.x+player.get_width()/2), y-(player.y+player.get_height()/2)
+                dx, dy = x-player.true_x, y-player.true_y
                 dist = math.sqrt(dx * dx + dy * dy)
                 dx, dy = dx / dist, dy / dist
-                print(dx, dy)
                 player.attack(dx, dy, 15)
             if event.type == pygame.QUIT:
                 quit()
@@ -201,29 +204,25 @@ def main(game_mode):
         # update each enemy's movement and action
         for enemy in enemies[:]:
             # Enemy:MELEE
-            if isinstance(enemy, EnemyRed):
-                enemy.chase(player.x, player.y)
+            enemy.chase(player.true_x, player.true_y)
+            dx, dy = enemy.calc_dxdy(player.true_x, player.true_y)
             # Enemy:RANGED
-            elif isinstance(enemy, EnemyBlue):
-                enemy.chase(player.x, player.y)
+            if type(enemy) is EnemyRanged:
                 enemy.cooldown()
-                dx,dy = enemy.calc_dxdy(player.x, player.y)
                 new_attack = enemy.attack(dx, dy, 5)
                 if new_attack:
                     enemies_attacks.append(new_attack)
             # Enemy:BOSS
-            elif isinstance(enemy, EnemyBoss):
+            elif type(enemy) is EnemyBoss:
                 # chase if off-screen, else hoover in screen
-                enemy.chase(player.x, player.y)
                 enemy.cooldown()
-                dx, dy = enemy.calc_dxdy(player.x, player.y)
                 boss_attack = enemy.attack(dx, dy, 5)
                 if boss_attack:
                     for shot in boss_attack:
                         enemies_attacks.append(shot)
             if collide(enemy, player):
                 player.health -= enemy.atk
-                player.knocked_back(enemy.x, enemy.y, player.get_width())
+                player.knocked_back(enemy.true_x, enemy.true_y, player.get_width())
 
         # move the player's attack, and check for any attack collision
         player.move_attack(enemies)
@@ -236,7 +235,7 @@ def main(game_mode):
             else:
                 if attack.collision(player):
                     player.health -= attack.dmg
-                    player.knocked_back(attack.x, attack.y, 0.5*player.get_width())
+                    player.knocked_back(attack.true_x, attack.true_y, 0.5*player.get_width())
                     if attack in enemies_attacks: enemies_attacks.remove(attack)
 
 

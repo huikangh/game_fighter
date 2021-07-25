@@ -2,6 +2,7 @@ import random
 from attack import *
 
 
+
 class Character:
     def __init__(self, x, y):
         self.x = x                              # x coordinate of object
@@ -14,26 +15,12 @@ class Character:
         self.max_health = None                  # maximum health of object
         self.char_img = None                    # image for the object
         self.atk_img = None                     # image for the object's attack
+        self.true_x = None                      # the x coordinate of the center of the image
+        self.true_y = None                      # the y coordinate of the center of the image
 
     def draw(self, window):
         window.blit(self.char_img, (self.x, self.y))
         self.healthbar(window)
-
-    def attack(self, dx, dy, spd):
-        if self.cd_counter == 0:
-            new_attack = Attack(self.x, self.y, dx, dy, 0.5*self.atk, spd, self.atk_img)
-            if not new_attack.off_screen(WIDTH, HEIGHT):
-                pygame.mixer.Sound.play(blast_sound)
-            self.cd_counter = 1
-            return new_attack
-        return None
-
-    def cooldown(self):
-        # attack is ready if cd_counter reaches the object's atk_cd
-        if self.cd_counter >= self.atk_cd:
-            self.cd_counter = 0
-        elif self.cd_counter > 0:
-            self.cd_counter += 1
 
     def healthbar(self, window):
         pygame.draw.rect(window, (255,0,0),
@@ -43,17 +30,20 @@ class Character:
 
     def knocked_back(self, x, y, kb_dist):
         # unit is knocked back towards the opposite direction of (x,y)
-        dx = x - self.x
-        dy = y - self.y
+        dx = x - self.true_x
+        dy = y - self.true_y
         dist = math.sqrt(dx*dx + dy*dy)
         self.x -= kb_dist * (dx/dist)
         self.y -= kb_dist * (dy/dist)
+        self.true_x -= kb_dist * (dx/dist)
+        self.true_y -= kb_dist * (dy/dist)
 
     def get_width(self):
         return self.char_img.get_width()
 
     def get_height(self):
         return self.char_img.get_height()
+
 
 
 class Hero(Character):
@@ -66,6 +56,8 @@ class Hero(Character):
         self.max_health = 100
         self.char_img = HIKARI
         self.atk_img = WIND_ARROW
+        self.true_x = self.x + self.get_width()/2
+        self.true_y = self.y + self.get_height()/2
         self.mask = pygame.mask.from_surface(self.char_img)
         self.attacks = []   # a list that stores all the player's attacks
 
@@ -75,12 +67,22 @@ class Hero(Character):
             attack.draw(window)
         self.healthbar(window)
 
+    def cooldown(self):
+        # attack is ready if cd_counter reaches the object's atk_cd
+        if self.cd_counter >= self.atk_cd:
+            self.cd_counter = 0
+        elif self.cd_counter > 0:
+            self.cd_counter += 1
+
     def attack(self, dx, dy, spd):
         if self.cd_counter == 0:
-            # adjust the x/y coordinates a bit based on the image size
-            x = self.x + (self.get_width()- 15)/2
-            y = self.y + (self.get_height()-15)/2
-            new_attack = Attack(x, y, dx, dy, self.atk, spd, self.atk_img)
+            # adjust which way the character will face
+            if dx > 0:
+                self.char_img = HIKARI
+            elif dx < 0:
+                self.char_img = pygame.transform.flip(HIKARI, True, False)
+            # adjust the x/y coordinates a bit based on the image size (-7.5)
+            new_attack = Attack(self.true_x-7.5, self.true_y-7.5, dx, dy, self.atk, spd, self.atk_img)
             pygame.mixer.Sound.play(arrow_sound)
             self.attacks.append(new_attack)
             self.cd_counter = 1
@@ -96,13 +98,14 @@ class Hero(Character):
                 for obj in objs:
                     if attack.collision(obj):
                         obj.health -= attack.dmg
-                        obj.knocked_back(self.x, self.y, 0.5*obj.get_width())
+                        obj.knocked_back(self.true_x, self.true_y, 0.5*obj.get_width())
                         if obj.health <= 0:
                             objs.remove(obj)
                         if attack in self.attacks: self.attacks.remove(attack)
 
 
-class EnemyRed(Character):
+
+class Enemy(Character):
     def __init__(self, x, y):
         super().__init__(x, y)
         self.mov_spd = 2
@@ -111,19 +114,39 @@ class EnemyRed(Character):
         self.health = 200
         self.max_health = 200
         self.char_img = GOBLIN
+        self.facing = "left"
         self.atk_img = PD_21_BULLET
+        self.true_x = self.x + self.get_width()/2
+        self.true_y = self.y + self.get_height()/2
         self.mask = pygame.mask.from_surface(self.char_img)
+
+    def calc_dxdy(self, x, y):
+        # calculate the delta_x and delta_y from unit to target as a value in [0,1] where dx + dy = 1
+        dx = x - self.true_x
+        dy = y - self.true_y
+        dist = math.sqrt(dx * dx + dy * dy)
+        return dx / dist, dy / dist
 
     def chase(self, x, y):
         # move towards the given (x,y) coordinate
-        dx = x - self.x
-        dy = y - self.y
+        dx = x - self.true_x
+        dy = y - self.true_y
         dist = math.sqrt(dx*dx + dy*dy)
         self.x += self.mov_spd * dx/dist
         self.y += self.mov_spd * dy/dist
+        self.true_x += self.mov_spd * dx/dist
+        self.true_y += self.mov_spd * dy/dist
+        # adjust which way the character will face
+        if self.facing == "left" and dx < 0:
+            self.facing = "right"
+            self.char_img = pygame.transform.flip(self.char_img, True, False)
+        elif self.facing == "right" and dx > 0:
+            self.facing = "left"
+            self.char_img = pygame.transform.flip(self.char_img, True, False)
 
 
-class EnemyBlue(Character):
+
+class EnemyRanged(Enemy):
     def __init__(self, x, y):
         super().__init__(x, y)
         self.mov_spd = 1
@@ -133,26 +156,32 @@ class EnemyBlue(Character):
         self.health = 100
         self.max_health = 100
         self.char_img = CROW
+        self.facing = "left"
         self.atk_img = PD_21_BULLET
+        self.true_x = self.x + self.get_width()/2
+        self.true_y = self.y + self.get_height()/2
         self.mask = pygame.mask.from_surface(self.char_img)
 
-    def calc_dxdy(self, x, y):
-        # calculate the delta_x and delta_y from unit to target as a value in [0,1] where dx + dy = 1
-        dx = x - self.x
-        dy = y - self.y
-        dist = math.sqrt(dx * dx + dy * dy)
-        return dx / dist, dy / dist
+    def cooldown(self):
+        # attack is ready if cd_counter reaches the object's atk_cd
+        if self.cd_counter >= self.atk_cd:
+            self.cd_counter = 0
+        elif self.cd_counter > 0:
+            self.cd_counter += 1
 
-    def chase(self, x, y):
-        # move towards the given (x,y) coordinate
-        dx = x - self.x
-        dy = y - self.y
-        dist = math.sqrt(dx * dx + dy * dy)
-        self.x += self.mov_spd * dx / dist
-        self.y += self.mov_spd * dy / dist
+    def attack(self, dx, dy, spd):
+        # adjust the x/y coordinates a bit based on the atk_img size (-7.5)
+        if self.cd_counter == 0:
+            new_attack = Attack(self.true_x-7.5, self.true_y-7.5, dx, dy, 0.5*self.atk, spd, self.atk_img)
+            if not new_attack.off_screen(WIDTH, HEIGHT):
+                pygame.mixer.Sound.play(blast_sound)
+            self.cd_counter = 1
+            return new_attack
+        return None
 
 
-class EnemyBoss(Character):
+
+class EnemyBoss(EnemyRanged):
     def __init__(self, x, y):
         super().__init__(x, y)
         self.mov_spd = 1.5
@@ -162,42 +191,21 @@ class EnemyBoss(Character):
         self.health = 2500
         self.max_health = 2500
         self.char_img = TRUE_DEVIL_CAIN
+        self.facing = "left"
         self.atk_img = MD_21_BULLET
+        self.true_x = self.x + self.get_width()/2
+        self.true_y = self.y + self.get_height()/2
         self.mask = pygame.mask.from_surface(self.char_img)
 
     def knocked_back(self, x, y, kb_dist):
         # unit is knocked back towards the opposite direction of (x,y)
-        dx = x - self.x
-        dy = y - self.y
+        dx = x - self.true_x
+        dy = y - self.true_y
         dist = math.sqrt(dx*dx + dy*dy)
         self.x -= kb_dist * (dx/dist) * 0.25
         self.y -= kb_dist * (dy/dist) * 0.25
-
-    def calc_dxdy(self, x, y):
-        # calculate the delta_x and delta_y from unit to target as a value in [0,1] where dx + dy = 1
-        dx = x - self.x
-        dy = y - self.y
-        dist = math.sqrt(dx*dx + dy*dy)
-        return dx/dist, dy/dist
-
-    def chase(self, x, y):
-        # move towards the given (x,y) coordinate
-        dx = x - self.x
-        dy = y - self.y
-        dist = math.sqrt(dx*dx + dy*dy)
-        self.x += self.mov_spd * dx/dist
-        self.y += self.mov_spd * dy/dist
-
-    def hoover(self):
-        dx = random.random()
-        dy = 1 - dx
-        # 50/50 to decide whether dx and dy are positive or negative
-        if random.random() <= 0.5:
-            dx = -dx
-        if random.random() <= 0.5:
-            dy = -dy
-        self.x += self.mov_spd * dx
-        self.y += self.mov_spd * dy
+        self.true_x -= kb_dist * (dx / dist) * 0.25
+        self.true_y -= kb_dist * (dy / dist) * 0.25
 
     def attack(self, dx, dy, spd):
         # fire multiple attacks in the shape of a fan
@@ -210,7 +218,7 @@ class EnemyBoss(Character):
                 new_dy = math.sin(math.radians(angle))
                 new_dx = -new_dx if dx < 0 else new_dx
                 new_dy = -new_dy if dx < 0 else new_dy
-                shot = Attack(self.x, self.y, new_dx, new_dy, 0.5*self.atk, spd, self.atk_img)
+                shot = Attack(self.true_x, self.true_y, new_dx, new_dy, 0.5*self.atk, spd, self.atk_img)
                 shots.append(shot)
             if not shots[2].off_screen(WIDTH, HEIGHT):
                 pygame.mixer.Sound.play(laser_sound)

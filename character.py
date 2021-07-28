@@ -184,7 +184,7 @@ class EnemyRanged(Enemy):
 class EnemyBoss(EnemyRanged):
     def __init__(self, x, y):
         super().__init__(x, y)
-        self.mov_spd = 1.5
+        self.mov_spd = 1
         self.atk = 50
         self.atk_cd = 90
         self.cd_counter = random.randrange(0, self.atk_cd)
@@ -221,7 +221,7 @@ class EnemyBoss(EnemyRanged):
                 shot = Attack(self.true_x, self.true_y, new_dx, new_dy, 0.5*self.atk, spd, self.atk_img)
                 shots.append(shot)
             if not shots[2].off_screen(WIDTH, HEIGHT):
-                pygame.mixer.Sound.play(laser_sound)
+                pygame.mixer.Sound.play(fire_sound)
             self.cd_counter = 1
         return shots
 

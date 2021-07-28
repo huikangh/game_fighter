@@ -28,12 +28,10 @@ YELLOW_SPACE_SHIP = pygame.transform.scale(YELLOW_SPACE_SHIP, SIZE_NORMAL)
 HIKARI = pygame.image.load(os.path.join("assets", "Bullseye_Hikari2.png"))
 GOBLIN = pygame.image.load(os.path.join("assets", "Goblin2.png"))
 CROW = pygame.image.load(os.path.join("assets", "Crow2.png"))
-GENTLEMAN_CROW = pygame.image.load(os.path.join("assets", "Gentleman_Crow2.png"))
 TRUE_DEVIL_CAIN = pygame.image.load(os.path.join("assets", "True_Devil_Cain2.png"))
 HIKARI = pygame.transform.scale(HIKARI, (50, 50))
 GOBLIN = pygame.transform.scale(GOBLIN, (45, 45))
 CROW = pygame.transform.scale(CROW, (40, 40))
-GENTLEMAN_CROW = pygame.transform.scale(GENTLEMAN_CROW, (45, 45))
 TRUE_DEVIL_CAIN = pygame.transform.scale(TRUE_DEVIL_CAIN, (70, 70))
 
 # load images of lasers/bullets
@@ -61,6 +59,11 @@ BG = pygame.transform.scale(BG, (WIDTH, HEIGHT-DISPLAY_BAR_HEIGHT))
 # sound files
 pygame.mixer.init()
 arrow_sound = pygame.mixer.Sound(os.path.join("assets", "Fire_Arrow2.mp3"))
-laser_sound = pygame.mixer.Sound(os.path.join("assets", "Laser_Blast2.mp3"))
+fire_sound = pygame.mixer.Sound(os.path.join("assets", "Fire_Woosh2.mp3"))
 blast_sound = pygame.mixer.Sound(os.path.join("assets", "Blast2.mp3"))
-pygame.mixer.music.load(os.path.join("assets", "Done_With_Work_David_Renda.mp3"))
+pygame.mixer.music.load(os.path.join("assets", "purrple-cat-field-of-fireflies.mp3"))
+
+# Field Of Fireflies by Purrple Cat | https://purrplecat.com/
+# Music promoted on https://www.chosic.com/
+# Creative Commons Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0)
+# https://creativecommons.org/licenses/by-sa/3.0/

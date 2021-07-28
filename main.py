@@ -21,8 +21,8 @@ enemies_attacks = []
 endless_waves = [[0, 0, 0]]
 adventure_waves = [[5, 0, 0],
                    [0, 5, 0],
-                   [5, 5, 0],
-                   [8, 8, 0],
+                   [4, 4, 0],
+                   [7, 7, 0],
                    [0, 0, 1]]
 
 
@@ -241,7 +241,7 @@ def main(game_mode):
 
 def main_menu():
     # background music
-    #pygame.mixer.music.play(-1)
+    pygame.mixer.music.play(-1)
 
     # buttons on the menu
     button1 = Button(WIDTH/2-200/2, HEIGHT/2-50/2,       210, 40, (55,110,219), (0,0,0), "Adventure Mode")
@@ -256,7 +256,7 @@ def main_menu():
         WIN.blit(BG, (0,DISPLAY_BAR_HEIGHT))
         # title
         title_font = pygame.font.SysFont("comicsans", 100)
-        title_label = title_font.render("Project Fighter", 1, (55,110,219))
+        title_label = title_font.render("PROJECT FIGHTER", 1, (55,110,219))
         WIN.blit(title_label, (WIDTH/2-title_label.get_width()/2, HEIGHT/4))
         # redraw_buttons
         button1.draw(WIN)

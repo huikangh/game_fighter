@@ -24,9 +24,9 @@ class Character:
 
     def healthbar(self, window):
         pygame.draw.rect(window, (255,0,0),
-            (self.x, self.y+self.char_img.get_height()+3, self.char_img.get_width(), 3))
+            (self.x, self.y-3, self.char_img.get_width(), 3))
         pygame.draw.rect(window, (0,255,0),
-            (self.x, self.y+self.char_img.get_height()+3, self.char_img.get_width()*self.health/self.max_health, 3))
+            (self.x, self.y-3, self.char_img.get_width()*self.health/self.max_health, 3))
 
     def knocked_back(self, x, y, kb_dist):
         # unit is knocked back towards the opposite direction of (x,y)
@@ -46,71 +46,11 @@ class Character:
 
 
 
-class Hero(Character):
-    def __init__(self, x, y):
-        super().__init__(x, y)
-        self.mov_spd = 3
-        self.atk = 100
-        self.atk_cd = 45
-        self.health = 100
-        self.max_health = 100
-        self.char_img = HIKARI
-        self.atk_img = WIND_ARROW
-        self.true_x = self.x + self.get_width()/2
-        self.true_y = self.y + self.get_height()/2
-        self.mask = pygame.mask.from_surface(self.char_img)
-        self.attacks = []   # a list that stores all the player's attacks
-
-    def draw(self, window):
-        window.blit(self.char_img, (self.x, self.y))
-        for attack in self.attacks:
-            attack.draw(window)
-        self.healthbar(window)
-
-    def cooldown(self):
-        # attack is ready if cd_counter reaches the object's atk_cd
-        if self.cd_counter >= self.atk_cd:
-            self.cd_counter = 0
-        elif self.cd_counter > 0:
-            self.cd_counter += 1
-
-    def attack(self, dx, dy, spd):
-        if self.cd_counter == 0:
-            # adjust which way the character will face
-            if dx > 0:
-                self.char_img = HIKARI
-            elif dx < 0:
-                self.char_img = pygame.transform.flip(HIKARI, True, False)
-            # adjust the x/y coordinates a bit based on the image size (-7.5)
-            new_attack = Attack(self.true_x-7.5, self.true_y-7.5, dx, dy, self.atk, spd, self.atk_img)
-            pygame.mixer.Sound.play(arrow_sound)
-            self.attacks.append(new_attack)
-            self.cd_counter = 1
-
-    def move_attack(self, objs):
-        self.cooldown()
-        for attack in self.attacks:
-            attack.move()
-            if attack.off_screen(WIDTH, HEIGHT):
-                self.attacks.remove(attack)
-            else:
-                # check if the player's attack hit any enemy among all the enemies
-                for obj in objs:
-                    if attack.collision(obj):
-                        obj.health -= attack.dmg
-                        obj.knocked_back(self.true_x, self.true_y, 0.5*obj.get_width())
-                        if obj.health <= 0:
-                            objs.remove(obj)
-                        if attack in self.attacks: self.attacks.remove(attack)
-
-
-
 class Enemy(Character):
     def __init__(self, x, y):
         super().__init__(x, y)
         self.mov_spd = 2
         self.atk = 40
-        self.atk_cd = None
         self.health = 200
         self.max_health = 200
         self.char_img = GOBLIN
@@ -224,4 +164,93 @@ class EnemyBoss(EnemyRanged):
                 pygame.mixer.Sound.play(fire_sound)
             self.cd_counter = 1
         return shots
+
+
+
+class Hero(Character):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.mov_spd = 3
+        self.atk = 100
+        self.atk_cd = 45
+        self.cd_counter = 1
+        self.health = 100
+        self.max_health = 100
+        self.char_img = HIKARI
+        self.atk_img = WIND_ARROW
+        self.true_x = self.x + self.get_width()/2
+        self.true_y = self.y + self.get_height()/2
+        self.mask = pygame.mask.from_surface(self.char_img)
+        self.attacks = []   # a list that stores all the player's attacks
+
+    def draw(self, window):
+        window.blit(self.char_img, (self.x, self.y))
+        for attack in self.attacks:
+            attack.draw(window)
+        self.healthbar(window)
+
+    def cooldown(self):
+        # attack is ready if cd_counter reaches the object's atk_cd
+        if self.cd_counter >= self.atk_cd:
+            self.cd_counter = 0
+        elif self.cd_counter > 0:
+            self.cd_counter += 1
+
+    def attack(self, dx, dy, spd):
+        if self.cd_counter == 0:
+            # adjust which way the character will face
+            if dx > 0:
+                self.char_img = HIKARI
+            elif dx < 0:
+                self.char_img = pygame.transform.flip(HIKARI, True, False)
+            # adjust the x/y coordinates a bit based on the image size (-7.5)
+            new_attack = Attack(self.true_x-7.5, self.true_y-7.5, dx, dy, self.atk, spd, self.atk_img)
+            pygame.mixer.Sound.play(arrow_sound)
+            self.attacks.append(new_attack)
+            self.cd_counter = 1
+
+    def move_attack(self, objs):
+        self.cooldown()
+        for attack in self.attacks:
+            attack.move()
+            if attack.off_screen(WIDTH, HEIGHT):
+                self.attacks.remove(attack)
+            else:
+                # check if the self's attack hit any enemy among all the enemies
+                for obj in objs:
+                    if attack.collision(obj):
+                        obj.health -= attack.dmg
+                        obj.knocked_back(self.true_x, self.true_y, 0.5*obj.get_width())
+                        if obj.health <= 0:
+                            objs.remove(obj)
+                        if attack in self.attacks: self.attacks.remove(attack)
+
+    def move(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_a] and self.x - self.mov_spd > 0:   # left
+            self.x -= self.mov_spd
+            self.true_x -= self.mov_spd
+        if keys[pygame.K_d] and self.x + self.mov_spd + self.get_width() < WIDTH:  # right
+            self.x += self.mov_spd
+            self.true_x += self.mov_spd
+        if keys[pygame.K_w] and self.y - self.mov_spd > 0:     # up
+            self.y -= self.mov_spd
+            self.true_y -= self.mov_spd
+        if keys[pygame.K_s] and self.y + self.mov_spd + self.get_height() < HEIGHT:  # down
+            self.y += self.mov_spd
+            self.true_y += self.mov_spd
+        if keys[pygame.K_UP]:
+            self.attack(0,-1, 15)
+        if keys[pygame.K_DOWN]:
+            self.attack(0, 1, 15)
+        if keys[pygame.K_RIGHT]:
+            self.attack(1, 0, 15)
+        if keys[pygame.K_LEFT]:
+            self.attack(-1, 0, 15)
+        if pygame.mouse.get_pressed()[0]:
+            x, y = pygame.mouse.get_pos()
+            dx, dy = x - self.true_x, y - self.true_y
+            dist = math.sqrt(dx * dx + dy * dy)
+            dx, dy = dx / dist, dy / dist
+            self.attack(dx, dy, 15)
 

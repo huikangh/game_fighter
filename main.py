@@ -167,39 +167,16 @@ def main(game_mode):
                     enemy = EnemyBoss(randx, randy)
                 enemies.append(enemy)
 
-        # check for player movement
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT] and player.x - player.mov_spd > 0:   # left
-            player.x -= player.mov_spd
-            player.true_x -= player.mov_spd
-        if keys[pygame.K_RIGHT] and player.x + player.mov_spd + player.get_width() < WIDTH:  # right
-            player.x += player.mov_spd
-            player.true_x += player.mov_spd
-        if keys[pygame.K_UP] and player.y - player.mov_spd > 0:     # up
-            player.y -= player.mov_spd
-            player.true_y -= player.mov_spd
-        if keys[pygame.K_DOWN] and player.y + player.mov_spd + player.get_height() < HEIGHT:  # down
-            player.y += player.mov_spd
-            player.true_y += player.mov_spd
-        if keys[pygame.K_w]:
-            player.attack(0,-1, 15)
-        if keys[pygame.K_s]:
-            player.attack(0, 1, 15)
-        if keys[pygame.K_d]:
-            player.attack(1, 0, 15)
-        if keys[pygame.K_a]:
-            player.attack(-1, 0, 15)
-
-        # player attack with mouse, or quit the game
+        # check if the player quits the game
         for event in events:
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                x, y = event.pos[0], event.pos[1]
-                dx, dy = x-player.true_x, y-player.true_y
-                dist = math.sqrt(dx * dx + dy * dy)
-                dx, dy = dx / dist, dy / dist
-                player.attack(dx, dy, 15)
             if event.type == pygame.QUIT:
                 quit()
+
+        # check for player movement/attack
+        player.move()
+
+        # move the player's attack, and check for any attack collision
+        player.move_attack(enemies)
 
         # update each enemy's movement and action
         for enemy in enemies[:]:
@@ -224,9 +201,6 @@ def main(game_mode):
                 player.health -= enemy.atk
                 player.knocked_back(enemy.true_x, enemy.true_y, player.get_width())
 
-        # move the player's attack, and check for any attack collision
-        player.move_attack(enemies)
-
         # move the enemies' attack
         for attack in enemies_attacks[:]:
             attack.move()
@@ -241,7 +215,7 @@ def main(game_mode):
 
 def main_menu():
     # background music
-    pygame.mixer.music.play(-1)
+    #pygame.mixer.music.play(-1)
 
     # buttons on the menu
     button1 = Button(WIDTH/2-200/2, HEIGHT/2-50/2,       210, 40, (55,110,219), (0,0,0), "Adventure Mode")
@@ -256,7 +230,7 @@ def main_menu():
         WIN.blit(BG, (0,DISPLAY_BAR_HEIGHT))
         # title
         title_font = pygame.font.SysFont("comicsans", 100)
-        title_label = title_font.render("PROJECT FIGHTER", 1, (55,110,219))
+        title_label = title_font.render("PROJECT: FIGHTER", 1, (55,110,219))
         WIN.blit(title_label, (WIDTH/2-title_label.get_width()/2, HEIGHT/4))
         # redraw_buttons
         button1.draw(WIN)

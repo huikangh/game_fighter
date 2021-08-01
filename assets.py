@@ -10,25 +10,25 @@ WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Project: Fighter")
 
 # load images of characters
-HIKARI = pygame.image.load(os.path.join("assets", "Bullseye_Hikari2.png")).convert_alpha()
-GOBLIN = pygame.image.load(os.path.join("assets", "Goblin2.png")).convert_alpha()
-CROW = pygame.image.load(os.path.join("assets", "Crow2.png")).convert_alpha()
-TRUE_DEVIL_CAIN = pygame.image.load(os.path.join("assets", "True_Devil_Cain2.png")).convert_alpha()
-HIKARI = pygame.transform.scale(HIKARI, (50, 50))
-GOBLIN = pygame.transform.scale(GOBLIN, (45, 45))
-CROW = pygame.transform.scale(CROW, (40, 40))
+HIKARI = pygame.image.load(os.path.join("assets", "Bullseye_Hikari.png")).convert_alpha()
+GOBLIN = pygame.image.load(os.path.join("assets", "Goblin.png")).convert_alpha()
+CROW = pygame.image.load(os.path.join("assets", "Crow.png")).convert_alpha()
+TRUE_DEVIL_CAIN = pygame.image.load(os.path.join("assets", "True_Devil_Cain.png")).convert_alpha()
+HIKARI = pygame.transform.scale(HIKARI, (55, 55))
+GOBLIN = pygame.transform.scale(GOBLIN, (50, 50))
+CROW = pygame.transform.scale(CROW, (45, 45))
 TRUE_DEVIL_CAIN = pygame.transform.scale(TRUE_DEVIL_CAIN, (70, 70))
 
 # load images of attacks
 WIND_ARROW = pygame.image.load(os.path.join("assets", "Wing_Arrow_Large2.png")).convert_alpha()
-PD_21_BULLET = pygame.image.load(os.path.join("assets", "PD-21_Bullet3.png")).convert_alpha()
+PD_21_BULLET = pygame.image.load(os.path.join("assets", "PD-21_Bullet2.png")).convert_alpha()
 MD_21_BULLET = pygame.image.load(os.path.join("assets", "MD-21_Bullet2.png")).convert_alpha()
 WIND_ARROW = pygame.transform.scale(WIND_ARROW, (15, 35))
 PD_21_BULLET = pygame.transform.scale(PD_21_BULLET, (15, 35))
 MD_21_BULLET = pygame.transform.scale(MD_21_BULLET, (15, 35))
 
 # load background image
-BG = pygame.image.load(os.path.join("assets", "sand3.png")).convert_alpha()
+BG = pygame.image.load(os.path.join("assets", "hung-viet-grass.png")).convert_alpha()
 BG = pygame.transform.scale(BG, (WIDTH, HEIGHT-DISPLAY_BAR_HEIGHT))
 
 # sound files

@@ -215,12 +215,16 @@ def main(game_mode):
 
 def main_menu():
     # background music
-    #pygame.mixer.music.play(-1)
-
+    pygame.mixer.music.play(-1)
+    # titles
+    title_font = pygame.font.SysFont("comicsans", 100)
+    title_label = title_font.render("PROJECT: FIGHTER", 1, (0, 0, 0))
+    version_font = pygame.font.SysFont("comicsans", 50)
+    version_label = version_font.render("Version 1.0", 1, (0, 0, 0))
     # buttons on the menu
-    button1 = Button(WIDTH/2-200/2, HEIGHT/2-50/2,       210, 40, (55,110,219), (0,0,0), "Adventure Mode")
-    button2 = Button(WIDTH/2-200/2, (HEIGHT/2-50/2)+60,  210, 40, (55,110,219), (0,0,0), "Endless Mode")
-    button3 = Button(WIDTH/2-200/2, (HEIGHT/2-50/2)+120, 210, 40, (55,110,219), (0,0,0), "Exit Game")
+    button1 = Button(WIDTH/2-200/2, HEIGHT/2-50/2,       210, 40, (81,166,121), (0,0,0), "Adventure Mode")
+    button2 = Button(WIDTH/2-200/2, (HEIGHT/2-50/2)+60,  210, 40, (81,166,121), (0,0,0), "Endless Mode")
+    button3 = Button(WIDTH/2-200/2, (HEIGHT/2-50/2)+120, 210, 40, (81,166,121), (0,0,0), "Exit Game")
 
     run = True
     while run:
@@ -229,9 +233,8 @@ def main_menu():
         WIN.fill((0, 0, 0))
         WIN.blit(BG, (0,DISPLAY_BAR_HEIGHT))
         # title
-        title_font = pygame.font.SysFont("comicsans", 100)
-        title_label = title_font.render("PROJECT: FIGHTER", 1, (55,110,219))
         WIN.blit(title_label, (WIDTH/2-title_label.get_width()/2, HEIGHT/4))
+        WIN.blit(version_label, (WIDTH/2-version_label.get_width()/2, HEIGHT/4+title_label.get_height()))
         # redraw_buttons
         button1.draw(WIN)
         button2.draw(WIN)
